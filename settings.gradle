@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 rootProject.name = "Base_JetPack_Compose_Widgets"
 include ':app'
 include ':table_section1'
+include ':expandable_section1'

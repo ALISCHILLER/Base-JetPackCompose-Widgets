@@ -3,7 +3,14 @@ package com.msa.table_section1
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -15,7 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -24,6 +31,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.msa.table_section1.ui.theme.Base_JetPack_Compose_WidgetsTheme
@@ -58,54 +66,9 @@ fun DefaultPreview() {
         Greeting("Android")
     }
 }
-
-/**
- * The horizontally scrollable table with header and content.
- * @param columnCount the count of columns in the table
- * @param cellWidth the width of column, can be configured based on index of the column.
- * @param data the data to populate table.
- * @param modifier the modifier to apply to this layout node.
- * @param headerCellContent a block which describes the header cell content.
- * @param cellContent a block which describes the cell content.
- */
-@Composable
-fun <T> Table(
-    columnCount: Int,
-    cellWidth: (index: Int) -> Dp,
-    data: List<T>,
-    modifier: Modifier = Modifier,
-    headerCellContent: @Composable (index: Int) -> Unit,
-    cellContent: @Composable (index: Int, item: T) -> Unit,
-) {
-    Surface(
-        modifier = modifier
-    ) {
-        LazyRow(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            items((0 until columnCount).toList()) { columnIndex ->
-                Column {
-                    (0..data.size).forEach { index ->
-                        Surface(
-                            border = BorderStroke(1.dp, Color.LightGray),
-                            contentColor = Color.Transparent,
-                            modifier = Modifier.width(cellWidth(columnIndex))
-                        ) {
-                            if (index == 0) {
-                                headerCellContent(columnIndex)
-                            } else {
-                                cellContent(columnIndex, data[index - 1])
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 @Composable
 fun Demo_Table() {
+    var visible by remember { mutableStateOf(false) }
     val people = listOf(
         Person("Alex", 21, false, "alex@demo-email.com"),
         Person("Adam", 35, true, "adam@demo-email.com"),
@@ -148,15 +111,16 @@ fun Demo_Table() {
             3 -> item.email
             else -> ""
         }
-
-        Text(
-            text = value,
-            fontSize = 20.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(16.dp),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Surface(Modifier.clickable { visible = !visible }) {
+            Text(
+                text = value,
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(16.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
 
     Table(
@@ -168,3 +132,52 @@ fun Demo_Table() {
         cellContent = cellText
     )
 }
+/**
+ * The horizontally scrollable table with header and content.
+ * @param columnCount the count of columns in the table
+ * @param cellWidth the width of column, can be configured based on index of the column.
+ * @param data the data to populate table.
+ * @param modifier the modifier to apply to this layout node.
+ * @param headerCellContent a block which describes the header cell content.
+ * @param cellContent a block which describes the cell content.
+ */
+@Composable
+fun <T> Table(
+    columnCount: Int,
+    cellWidth: (index: Int) -> Dp,
+    data: List<T>,
+    modifier: Modifier = Modifier,
+    headerCellContent: @Composable (index: Int) -> Unit,
+    cellContent: @Composable (index: Int, item: T) -> Unit,
+) {
+    Surface(
+        modifier = modifier
+    ) {
+
+        LazyRow(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            items((0 until columnCount).toList()) { columnIndex ->
+                Column {
+                    (0..data.size).forEach { index ->
+                        Surface(
+                            border = BorderStroke(1.dp, Color.LightGray),
+                            contentColor = Color.Black,
+                            modifier = Modifier.width(cellWidth(columnIndex))
+
+                        ) {
+
+                            if (index == 0) {
+                                    headerCellContent(columnIndex)
+                            } else {
+                                cellContent(columnIndex, data[index - 1])
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
